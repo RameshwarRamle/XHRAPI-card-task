@@ -1,0 +1,36 @@
+#cardcontainer .card {
+    height: 240px;      
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+
+#cardcontainer .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+}
+
+
+.card-header {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+    font-size: 18px;
+    padding: 10px 14px;
+}
+
+
+.card-body {
+    overflow: hidden;
+    font-size: 15px;
+    color: #555;
+    padding: 10px 14px;
+}
+
+
+.card-footer {
+    padding: 10px 14px;
+}
