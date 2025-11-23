@@ -8,7 +8,7 @@ const idcontrol = document.getElementById("numbers");
 const submitbtn = document.getElementById("submitbtn");
 const updatebtn = document.getElementById("updatebtn");
 const removebtn = document.getElementById("removebtn");
-const loader = document.getElementById("loader");
+const spinner = document.getElementById("spinner");
 
 
 
@@ -17,26 +17,26 @@ const BASE_URL = "https://jsonplaceholder.typicode.com/";
 const POST_URL = `${BASE_URL}/posts`;
 
 
-function ontoggleloader(flag){
-    if(flag){
-        loader.classList.remove("d-none")
-    }else{
-        loader.classList.add("d-none")
+function togglespinner(flag) {
+    if (flag) {
+        spinner.classList.remove("d-none")
+    } else {
+        spinner.classList.add("d-none")
     }
 }
 
 
-function snackbar(title, icon){
+function snackbar(title, icon) {
     swal.fire({
         title,
         icon,
-        timer:2000
+        timer: 2000
     })
 
 }
 
 
-function onEdit(ele){
+function onEdit(ele) {
 
     let card = ele.closest(".col-md-3");
 
@@ -50,16 +50,16 @@ function onEdit(ele){
 
     xhr.open("GET", EDIT_URL);
 
+    togglespinner(true)
+    xhr.onload = function () {
 
-    xhr.onload = function(){
-
-        if(xhr.status >= 200 && xhr.status<300){
+        if (xhr.status >= 200 && xhr.status < 300) {
             let res = JSON.parse(xhr.response)
-            cl(res)      
-            
+            cl(res)
+
             titlecontrol.value = res.title,
-            contentcontrol.value = res.body,
-            idcontrol.value = res.id
+                contentcontrol.value = res.body,
+                idcontrol.value = res.id
 
 
             let removeBtnOfThisCard = card.querySelector(".removebtn")
@@ -67,50 +67,62 @@ function onEdit(ele){
 
             submitbtn.classList.add("d-none");
             updatebtn.classList.remove("d-none");
-            
-            
+
+
             cardform.scrollIntoView({ behavior: "smooth" });
-    
+
         }
+        togglespinner(false)
     }
 
     xhr.send(null)
 
-   
+
 }
 
 
 
-function onremove(ele){
-   let remove_id = ele.closest(".col-md-3").id
+function onremove(ele) {
+    togglespinner(true)
 
-   const DELETE_URL = `${POST_URL}/${remove_id}`;
+    Swal.fire({
+        title: "Do you want to remove this blog?",
+        showCancelButton: true,
+        confirmButtonText: "Remove",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            let remove_id = ele.closest(".col-md-3").id
 
-    let xhr = new XMLHttpRequest();
+            const DELETE_URL = `${POST_URL}/${remove_id}`;
 
-    xhr.open("DELETE", DELETE_URL);
+            let xhr = new XMLHttpRequest();
+
+            xhr.open("DELETE", DELETE_URL);
 
 
-    xhr.onload = function(){
-        if(xhr.status>=200 && xhr.status<300){
-            let data = xhr.response
-            cl(data) 
-            
-            ele.closest(".col-md-3").remove();
-            snackbar(`The post of id=(${remove_id}) deleted successfully`, "success")
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    let data = xhr.response
+                    cl(data)
 
-        }else{
-            snackbar(`Something went wrong while deleting post`, "error")
+                    ele.closest(".col-md-3").remove();
+                    snackbar(`The post of id=(${remove_id}) deleted successfully`, "success")
+
+                } else {
+                    snackbar(`Something went wrong while deleting post`, "error")
+                }
+                togglespinner(false)
+            }
+            xhr.send(null);
         }
-    }
-    xhr.send(null);
+    });
 
 }
 
-function createcards(arr){
+function createcards(arr) {
 
-    let result = arr.map((obj) =>{
-        return`
+    let result = arr.map((obj) => {
+        return `
             <div class="col-md-3" id=${obj.id}>
                 <div class="card mb-5">
                     <div class="card-header">
@@ -124,7 +136,7 @@ function createcards(arr){
                         <button  class="btn btn-outline-danger btn-sm removebtn" onclick = "onremove(this)">Remove</button>
                     </div>
                 </div>
-            </div>` 
+            </div>`
     }).join('');
 
     cardcontainer.innerHTML = result;
@@ -135,7 +147,7 @@ function createcards(arr){
 
 
 
-function fetchallposts(){
+function fetchallposts() {
     // ṣtep-1  >>  create instance/object of XMLHttpRequest
     let xhr = new XMLHttpRequest();
 
@@ -146,11 +158,11 @@ function fetchallposts(){
 
 
     // step-3 onloadfunction
-    xhr.onload = function(){
+    xhr.onload = function () {
         // check condition greater than 200 && less than 300 is success
         cl(xhr.readyState);
 
-        if(xhr.status >= 200 && xhr.status < 300 && xhr.readyState === 4){
+        if (xhr.status >= 200 && xhr.status < 300 && xhr.readyState === 4) {
             let data = JSON.parse(xhr.responseText)
             // cl(data)
             createcards(data);
@@ -164,14 +176,14 @@ fetchallposts();
 
 
 
-function onsubmit(eve){
+function onsubmit(eve) {
     eve.preventDefault();
 
-
+    togglespinner(true)
     let card_obj = {
-        title:titlecontrol.value,
-        body:contentcontrol.value,
-        id:idcontrol.value
+        title: titlecontrol.value,
+        body: contentcontrol.value,
+        id: idcontrol.value
     }
     cl(card_obj);
     eve.target.reset();
@@ -182,15 +194,15 @@ function onsubmit(eve){
     xhr.open("POST", POST_URL);
 
     // onload function to check response is success or not
-    xhr.onload = function(){
-        if(xhr.status>=200 && xhr.status<300){
+    xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 300) {
             let res = JSON.parse(xhr.response)
             cl(res);
 
             let card = document.createElement("div");
             card.className = `col-md-3`;
             card.id = res.id;
-            card.innerHTML = 
+            card.innerHTML =
                 `<div class="card mb-3">
                     <div class="card-header">
                         <h3>${card_obj.title}</h3>
@@ -205,9 +217,10 @@ function onsubmit(eve){
                 </div>`
             cardcontainer.prepend(card);
             snackbar(`The post of id=${card.id} is created successfully`, "success")
-        }else{
+        } else {
             snackbar(`Something went wrong while creating post`, "error")
         }
+        togglespinner(false)
 
     }
     // send body
@@ -216,25 +229,26 @@ function onsubmit(eve){
 }
 
 
-function onupdate(){
+function onupdate() {
     let UPDATED_ID = localStorage.getItem("EDIT_ID");
 
     const UPDATE_URL = `${POST_URL}/${UPDATED_ID}`;
 
+    togglespinner(true)
     let updated_obj = {
-                title:titlecontrol.value,
-                body:contentcontrol.value,
-                id:UPDATED_ID
-            }
-    
+        title: titlecontrol.value,
+        body: contentcontrol.value,
+        id: UPDATED_ID
+    }
+
     cardform.reset();
-    
+
     let xhr = new XMLHttpRequest();
 
     xhr.open("PATCH", UPDATE_URL)
 
-    xhr.onload = function(){
-        if(xhr.status>=200 && xhr.status<300){
+    xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 300) {
             let res = JSON.parse(xhr.response)
             cl(res)
 
@@ -246,17 +260,18 @@ function onupdate(){
             updatebtn.classList.add("d-none");
             submitbtn.classList.remove("d-none");
             let removeBtnOfThisCard = card.querySelector(".removebtn");
-            removeBtnOfThisCard.classList.remove("d-none"); 
+            removeBtnOfThisCard.classList.remove("d-none");
 
             snackbar(`The post of id=${UPDATED_ID} updated successfully`, "success")
-        }else{
+        } else {
             snackbar(`Something went wrong while updating post`, "error")
         }
+        togglespinner(false)
 
     }
     xhr.send(JSON.stringify(updated_obj))
 
-   
+
 }
 
 cardform.addEventListener("submit", onsubmit);
